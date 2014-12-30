@@ -17,22 +17,22 @@ install_github('')
 ```
 
 ## Example ##
-Analysis of C2C12 cell miRNA and mRNA expression data using the miRNAmRNA-package
+Analysis of C2C12 cell miRNA and mRNA expression data using the miRNAmRNA-package. This analysis briefly describes the analysis performed in 
+[vanIterson2013](http://nar.oxfordjournals.org/content/41/15/e146.long)
 
 Download target predictions manually from PITA, TargetScan and microCosm. Optionally construct parser for other prediction tools see ?addTable.
 
 ```s
-options(width=70)
 library(miRNAmRNA)
-dataDir <- "/data/articles/2012miRNA/C2C12/data/"
-resultsDir <- "/home/mviterson/Documents/packages/miRNAmRNA"
+dataDir <- "pathToData"
+resultsDir <- "pathToResults"
 dbName <- "mir.Mm.db"
 filePITA <- file.path(dataDir, "targets_data", "PITA_targets_mm9_0_0_TOP.tab")
 fileMicrocosm <- file.path(dataDir, "targets_data", "v5.gff.mus_musculus")  
 fileTargetScan <- file.path(dataDir, "targets_data", "Conserved_Site_Context_Scores61.txt")
 ``` 
 
-Construct the database and inspect its content.
+Construct the database and inspect its contents.
 
 ```s
 addTable(filePITA, tableName="pita", path=reultsDir, dbName=dbName, Org="Mm") 
@@ -97,7 +97,7 @@ Run the integrated analysis.
 ```s
 library(miRNAmRNA)
 dbName <- "mir.Mm.db"
-resultsDir <- "/home/mviterson/Documents/packages/miRNAmRNA"
+resultsDir <- "pathToResults"
 load(file.path(resultsDir, "mExprs.RData"))
 load(file.path(resultsDir, "miExprs.RData"))
 results <- rungt(mirs=rownames(miExprs), X=mExprs, Y=miExprs, path=resultsDir, dbName=dbName, tables=c("microcosm", "pita", "targetscan"), numOverlapping=3)
@@ -107,7 +107,7 @@ save(results, file=file.path(resultsDir, "C2C12pairs.RData"))
 ```s
 library(lattice)
 library(directlabels)
-resultsDir <- "/home/mviterson/Documents/packages/miRNAmRNA"
+resultsDir <- "pathToResults"
 load(file.path(resultsDir, "miExprs.RData"))
 load(file=file.path(resultsDir, "C2C12pairs.RData"))
 topMirs <- head(results$mirs, n=20)
@@ -121,7 +121,7 @@ print(direct.label(xyplot(miExpr~Time, groups=miRNA, data, type=c("b", "g"), lwd
 
 ```s
 library(xtable)
-resultsDir <- "/home/mviterson/Documents/packages/miRNAmRNA"
+resultsDir <- "pathToResults"
 load(file=file.path(resultsDir, "C2C12pairs.RData"))
 topMirs <- head(results$mirs, n=20)
 topMiExprs <- miExprs[rownames(miExprs) %in% rownames(topMirs),c(1,4)]
@@ -156,7 +156,6 @@ print(xtable(mir22[,-c(4,5)],
        caption="Overview of microRNA mmu-miR-22 targets with strict overlap between the three databases TargetScan, Microcosm and PITA."),
        tabular.environment="longtable", floating=FALSE)
 ```        
-      
 
 ```s
 print(xtable(mir133a[,-c(4,5)],
