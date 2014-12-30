@@ -10,10 +10,11 @@ A framework for microRNA mRNA expression data integrated analysis
 - describe features
 
 ## Installation ##
-If you want to install the latest development version use the [devtools] package to install the [rmarkdown] and [knitr (devel)] prerequisites and this package.
+If you want to install the latest development version use the devtools package to install the miRNAmRNA package. 
+Dependency of the package are: AnnotationDbi, RSQLite, org.Mm.eg.db, org.Hs.eg.db, limma, globaltest all of which can be install using BioConductor's biocLite.
 ```s
 library(devtools)
-install_github('')
+install_github('git.lumc.nl/mvaniterson/mirnamrna')
 ```
 
 ## Example ##
