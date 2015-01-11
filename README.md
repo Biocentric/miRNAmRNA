@@ -14,7 +14,7 @@ If you want to install the latest development version use the devtools package t
 Dependency of the package are: AnnotationDbi, RSQLite, org.Mm.eg.db, org.Hs.eg.db, limma, globaltest all of which can be install using BioConductor's biocLite.
 ```s
 library(devtools)
-install_github('git.lumc.nl/mvaniterson/mirnamrna')
+install_git('https://git.lumc.nl/mvaniterson/mirnamrna.git')
 ```
 
 ## Example ##
