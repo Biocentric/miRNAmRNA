@@ -11,8 +11,16 @@ A framework for microRNA mRNA expression data integrated analysis
 
 ## Installation ##
 If you want to install the latest development version use the devtools package to install the miRNAmRNA package. 
-Dependency of the package are: AnnotationDbi, RSQLite, org.Mm.eg.db, org.Hs.eg.db, limma, globaltest all of which can be install using BioConductor's biocLite.
-```s
+Dependency of the package are: AnnotationDbi, RSQLite, org.Mm.eg.db, org.Hs.eg.db, limma, globaltest all of which can be install using BioConductor's biocLite. For example, 
+
+```r
+biocLite(c("AnnotationDbi", "RSQLite", "org.Mm.eg.db", "org.Hs.eg.db", "limma", "globaltest", "devtools"))
+```
+this will take some time!
+
+Next install the mirnmrnapackage using:
+
+```r
 library(devtools)
 install_git('https://git.lumc.nl/mvaniterson/mirnamrna.git')
 ```
@@ -23,20 +31,27 @@ Analysis of C2C12 cell miRNA and mRNA expression data using the miRNAmRNA-packag
 
 Download target predictions manually from PITA, TargetScan and microCosm. Optionally construct parser for other prediction tools see ?addTable.
 
-```s
+```r
+##requires write access to the installed package directory
+##if you don't have define your own directory 
 library(miRNAmRNA)
-dataDir <- "pathToData"
-resultsDir <- "pathToResults"
+dir.create(file.path(path.package("miRNAmRNA"),"extdata")) 
+downloadTargets(file.path(path.package("miRNAmRNA"),"extdata"))
+```
+
+```r
+dataDir <- file.path(path.package("miRNAmRNA"),"extdata")
+resultsDir <- file.path(path.package("miRNAmRNA"),"extdata") ##can be different from dataDir as well
 dbName <- "mir.Mm.db"
-filePITA <- file.path(dataDir, "targets_data", "PITA_targets_mm9_0_0_TOP.tab")
-fileMicrocosm <- file.path(dataDir, "targets_data", "v5.gff.mus_musculus")  
-fileTargetScan <- file.path(dataDir, "targets_data", "Conserved_Site_Context_Scores61.txt")
+filePITA <- dir(dataDir, full.names=TRUE, pattern="PITA")
+fileMicrocosm <- dir(dataDir, full.names=TRUE, pattern="gff")
+fileTargetScan <- dir(dataDir, full.names=TRUE, pattern="Conserved")
 ``` 
 
 Construct the database and inspect its contents.
 
-```s
-addTable(filePITA, tableName="pita", path=reultsDir, dbName=dbName, Org="Mm") 
+```r
+addTable(filePITA, tableName="pita", path=resultsDir, dbName=dbName, Org="Mm") 
 addTable(fileMicrocosm, tableName="microcosm", path=resultsDir, dbName=dbName, Org="Mm") 
 addTable(fileTargetScan, tableName="targetscan", path=resultsDir, dbName=dbName, Org="Mm") 
 dbInfo(resultsDir, dbName)
@@ -47,7 +62,7 @@ dbHeadTable(resultsDir, dbName, "microcosm", n=10)
 
 Download microRNA and mRNA expression data and perform some preprocessing steps such as identifier mapping.
 
-```s
+```r
 ##extract and process data
 library(GEOquery)
 miRNA <- getGEO(filename=file.path(dataDir, "expression_data", "GSE9449_series_matrix.txt.gz")) #also available from ArrayExpress E-GEOD-9449
@@ -60,7 +75,7 @@ strwhite <- function(x)
     x <- sub("^[[:blank:]]*", "", x, perl=TRUE) ##leading
     x <- sub("[[:blank:]]*$", "", x, perl=TRUE) ##trailing
     x
-  }
+  } 
 
 extractID <- function(x)
   {
@@ -82,7 +97,7 @@ rownames(miExprs)[rownames(miExprs) == "mmu-miR-133a133b"] <- "mmu-miR-133a"
 save(miExprs, file=file.path(resultsDir, "miExprs.RData"))
 ``` 
 
-```s
+```r
 mRNA <- getGEO(filename=file.path(dataDir, "expression_data", "GSE19968_series_matrix.txt.gz")) 
 mFeature <- pData(featureData(mRNA))
 mExprs <- exprs(mRNA)
@@ -95,7 +110,7 @@ save(mExprs, file=file.path(resultsDir, "mExprs.RData"))
 
 Run the integrated analysis.
 
-```s
+```r
 library(miRNAmRNA)
 dbName <- "mir.Mm.db"
 resultsDir <- "pathToResults"
@@ -105,7 +120,7 @@ results <- rungt(mirs=rownames(miExprs), X=mExprs, Y=miExprs, path=resultsDir, d
 save(results, file=file.path(resultsDir, "C2C12pairs.RData"))
 ``` 
 
-```s
+```r
 library(lattice)
 library(directlabels)
 resultsDir <- "pathToResults"
@@ -120,7 +135,7 @@ print(direct.label(xyplot(miExpr~Time, groups=miRNA, data, type=c("b", "g"), lwd
              scales = list(x = list(labels = colnames(X))))))
 ``` 
 
-```s
+```r
 library(xtable)
 resultsDir <- "pathToResults"
 load(file=file.path(resultsDir, "C2C12pairs.RData"))
@@ -136,7 +151,7 @@ xtable(topMirs[order(topMirs$'P-value'), ],
        caption="Overview of significant miRNA target sets with strict overlap between the three prediction tools TargetScan, MicroCosm and PITA.")
 ``` 
 
-```s
+```r
 mir22 <- results$targets[["mmu-miR-22"]]
 mir22 <- cbind(Symbol = unlist(mget(rownames(results$targets[["mmu-miR-22"]]), org.Mm.egSYMBOL, ifnotfound=NA)), mir22)
 mir22$Association[mir22$Association == 0] <- "neg."
@@ -151,21 +166,21 @@ mir26a$Association[mir26a$Association == 0] <- "neg."
 mir26a$Association[mir26a$Association == 1] <- "pos."
 ```
 
-```s
+```r
 print(xtable(mir22[,-c(4,5)],
        display=c("d", "s", "f", "s"), digits=c(0,0,5,0),
        caption="Overview of microRNA mmu-miR-22 targets with strict overlap between the three databases TargetScan, Microcosm and PITA."),
        tabular.environment="longtable", floating=FALSE)
 ```        
 
-```s
+```r
 print(xtable(mir133a[,-c(4,5)],
        display=c("d", "s", "f", "s"), digits=c(0,0,5,0),
        caption="Overview of microRNA mmu-miR-133a targets with strict overlap between the three databases TargetScan, Microcosm and PITA."),
        tabular.environment="longtable", floating=FALSE)
 ```
 
-```s
+```r
 print(xtable(mir26a[,-c(4,5)],
        display=c("d", "s", "f", "s"), digits=c(0,0,5,0),
        caption="Overview of microRNA mmu-miR-26a targets with strict overlap between the three databases TargetScan, Microcosm and PITA."),

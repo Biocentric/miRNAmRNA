@@ -10,7 +10,6 @@
 ##' @return vector of ids type 'to' 
 ##' @author Maarten van Iterson
 ##' @export
-##' @importClassesFrom AnnotationDbi
 ##' @importMethodsFrom AnnotationDbi mget
 mapIds <- function(x, from, to="ENTREZ", organism=c("Hs", "Mm"))
 {
@@ -64,11 +63,11 @@ targetscan <- function(file, Org, full=TRUE)
   {
     datafull <- read.table(file, sep="\t", header = TRUE, comment.char="", as.is=TRUE, na.string="NULL")
 
-    columns <- c("mirbase_id", "Gene.ID") #version 4.1
-    ##columns <- c("miRNA", "Gene.ID", "context..score") #version 6.1
+    ##columns <- c("mirbase_id", "Gene.ID") #version 4.1
+    columns <- c("miRNA", "Gene.ID", "context..score") #version 6.1
     ##columns <- c("miRNA", "Gene.ID", "context_score") #version 6.0
    
-    contextscore <- colnames(datafull)[grep("context.*score", colnames(datafull))]
+    contextscore <- colnames(datafull)[grep("^context.*score$", colnames(datafull))]
     
     columns <- c("miRNA", "Gene.ID", contextscore)
     
@@ -104,36 +103,34 @@ gffRead <- function(gffFile, nrows = -1)
   gff <- read.table(gffFile, sep="\t", as.is=TRUE, quote="", header=FALSE, comment.char="#", nrows = nrows, 
                    colClasses=c("character", "character", "character", "integer", "integer", "character", "character", "character", "character"))
   
-  colnames(gff) <- c("seqname", "source", "feature", "start", "end",  "score", "strand", "frame", "attributes")
+  colnames(gff) <- c("seqname", "source", "feature", "start", "end",  "score", "strand", "frame", "attributes", "url")
   
 
   stopifnot(!any(is.na(gff$start)), !any(is.na(gff$end)))
   return(gff)
 }
 
-microcosm <- function(file, Org, full=TRUE)
+microcosm <- function(file, Org, full=FALSE)
   {
     datafull <- gffRead(file)    
     rows <- grep(ifelse(Org=="Mm", "mmu", "hsa"), datafull$seqname)       
     data <- datafull[rows, ]
-    colnames(data)[10] <- "Ensembl"
-    
-    extractID <- function(x) gsub('\\"', "", gsub(".*gene=", "", x))
-    data$Target <- sapply(data$Ensembl, extractID, USE.NAMES=FALSE)
-
+    data[, 10] <- gsub("^.*=|\"", "", data[,10]) ##changed 2015??
+    colnames(data)[10] <- "Target"
+     
     data$mRNA <- mapIds(data$Target, from="ENSEMBLTRANS", to="ENTREZ", organism=Org) 
     data$Symbol <- mapIds(data$Target, from="ENSEMBLTRANS", to="SYMBOL", organism=Org) 
-    
+
     columns <- c("seqname", "mRNA", "Symbol", "Target", "score")
     cid <- colnames(datafull) %in% columns
-    
+        
     data <- data[, columns]
-
+    colnames(data) <- c("miRNA", "mRNA", "Symbol", "Target", "Score")
+    
      ##add all information
     if(full)
       data <- cbind(data, datafull[rows, !cid])
-    
-    colnames(data) <- c("miRNA", "mRNA", "Symbol", "Target", "Score")
+        
     data$Score <- as.numeric(data$Score)
     data <- data[order(data$Score),]    
     data

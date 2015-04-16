@@ -27,7 +27,7 @@ addTable <- function(file, tableName=c("pita", "microcosm", "targetscan"), parse
                    microcosm = microcosm(file, Org),
                    targetscan = targetscan(file, Org),
                    parser(file, Org))
-    
+
     cat("selected", nrow(data), "rows.\n")  
        
     returned <- dbWriteTable(con, tableName, data, overwrite=TRUE) 
