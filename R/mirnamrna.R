@@ -127,6 +127,10 @@ rungt <- function (mirs, X, Y, path, dbName, tables, numOverlapping, top = -1)
         if (is.null(ovl)) 
             next
         sX <- X[which(rownames(X) %in% rownames(ovl)), , drop = FALSE]
+        if(dim(sX)[1] == 0) {
+                message("Skipping... No targets in data for this microRNA!")
+                next
+            }
         sy <- Y[which(rownames(Y) %in% mirs[i]), ]
         obj <- gt(sy, t(sX), directional = 1e-06)        
         tbl <- gtTable(obj)
