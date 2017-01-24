@@ -4,8 +4,8 @@ Title: miRNA mRNA Expression Integration
 Version: 1.0
 Date: 2015-04-16
 Author: Sander Bervoets <s.bervoets@student.vu.nl> and Maarten van Iterson
-    <M.van_iterson.HG@lumc.nl>
-Maintainer: Maarten van Iterson <M.van_iterson.HG@lumc.nl>
+    <m.van_iterson@lumc.nl>
+Maintainer: Maarten van Iterson <m.van_iterson@lumc.nl>
 Description: More about what it does (maybe more than one line)
 Depends: R (>= 2.12.0), AnnotationDbi, RSQLite, org.Mm.eg.db,
         org.Hs.eg.db, limma, globaltest
